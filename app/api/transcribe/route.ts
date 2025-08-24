@@ -6,6 +6,9 @@ import { writeFile, unlink, readFile, access } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { constants } from 'fs';
+import * as fs from 'fs';
+import * as path from 'path';
+import { execSync } from 'child_process';
 
 // FFmpeg binary setup with multiple fallback strategies
 let ffmpegPath: string | null = null;
@@ -17,32 +20,30 @@ function setupFFmpeg() {
   // Strategy 1: Use ffmpeg-static package path
   if (ffmpegStatic) {
     try {
-      require('fs').accessSync(ffmpegStatic, constants.F_OK);
+      fs.accessSync(ffmpegStatic, constants.F_OK);
       ffmpegPath = ffmpegStatic;
       ffmpeg.setFfmpegPath(ffmpegStatic);
         console.log(' FFmpeg binary found and validated at:', ffmpegStatic);
       return true;
-    } catch (error) {
+    } catch {
       console.warn(' FFmpeg binary not accessible at static path:', ffmpegStatic);
     }
   }
   
   // Strategy 2: Try to resolve the path manually
   try {
-    const path = require('path');
     const alternativePath = path.join(process.cwd(), 'node_modules', 'ffmpeg-static', 'ffmpeg.exe');
-    require('fs').accessSync(alternativePath, constants.F_OK);
+    fs.accessSync(alternativePath, constants.F_OK);
     ffmpegPath = alternativePath;
     ffmpeg.setFfmpegPath(alternativePath);
     console.log(' FFmpeg binary found at alternative path:', alternativePath);
     return true;
-  } catch (error) {
+  } catch {
     console.warn(' FFmpeg binary not found at alternative path');
   }
   
   // Strategy 3: Try system FFmpeg (if available)
   try {
-    const { execSync } = require('child_process');
     const systemFfmpeg = execSync('where ffmpeg', { encoding: 'utf8' }).trim();
     if (systemFfmpeg) {
       ffmpegPath = systemFfmpeg;
@@ -50,7 +51,7 @@ function setupFFmpeg() {
       console.log(' Using system FFmpeg at:', systemFfmpeg);
       return true;
     }
-  } catch (error) {
+  } catch {
     console.warn(' System FFmpeg not found');
   }
   
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
       console.log(`File saved successfully, size: ${bytes.byteLength} bytes`);
 
       let audioPath = inputPath;
-      let filesToCleanup = [inputPath];
+      const filesToCleanup = [inputPath];
 
       // Convert video to audio if necessary
       if (file.type.startsWith('video/')) {
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
           console.log('Video conversion successful, output file exists');
           audioPath = outputPath;
           filesToCleanup.push(outputPath);
-        } catch (err) {
+        } catch {
           console.error('Video conversion failed - output file not found');
           throw new Error('Video conversion failed to produce output file');
         }
@@ -206,7 +207,7 @@ async function convertVideoToAudio(inputPath: string, outputPath: string): Promi
       .on('error', (err, stdout, stderr) => {
         console.error('FFmpeg conversion failed');
         console.error('Error message:', err.message);
-        console.error('Error code:', (err as any).code);
+        console.error('Error code:', (err as Error & { code?: string }).code);
         console.error('FFmpeg path used:', ffmpegPath);
         
         if (stdout) console.error('FFmpeg stdout:', stdout);
@@ -281,11 +282,11 @@ async function cleanupFiles(paths: string[]) {
       await access(path, constants.F_OK);
       await unlink(path);
       console.log(`Successfully cleaned up: ${path}`);
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
         console.log(`File already deleted or never existed: ${path}`);
       } else {
-        console.warn(`Failed to cleanup file ${path}:`, error.message);
+        console.warn(`Failed to cleanup file ${path}:`, error instanceof Error ? error.message : String(error));
       }
     }
   }

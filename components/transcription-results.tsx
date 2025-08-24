@@ -21,7 +21,7 @@ export function TranscriptionResults({ result, onAnalyze, isAnalyzing = false }:
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Transcription Results</h2>
       
       {/* Metadata */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">Confidence</p>
           <p className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -34,12 +34,7 @@ export function TranscriptionResults({ result, onAnalyze, isAnalyzing = false }:
             {formatDuration(result.metadata.duration)}
           </p>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Channels</p>
-          <p className="text-xl font-semibold text-gray-900 dark:text-white">
-            {result.metadata.channels}
-          </p>
-        </div>
+        
       </div>
 
       {/* Transcription Text */}
