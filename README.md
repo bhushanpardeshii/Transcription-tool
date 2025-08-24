@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Audio & Video Transcription App
 
-## Getting Started
+A Next.js web application that accepts audio or video recordings and converts speech to text using Deepgram's AI-powered transcription service.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🎵 **Audio Support**: WebM, M4A, WAV, MP3 formats
+- 🎬 **Video Support**: WebM, MP4 formats (automatically converts to audio)
+- 🚀 **Fast Processing**: Uses FFmpeg for efficient video-to-audio conversion
+- 🎯 **Accurate Transcription**: Powered by Deepgram's Nova-2 model
+- 📊 **Detailed Results**: Shows confidence scores, duration, and channel information
+- 🌙 **Dark Mode**: Beautiful UI with dark/light mode support
+- 📋 **Copy to Clipboard**: Easy copying of transcription results
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Audio Processing**: fluent-ffmpeg, ffmpeg-static
+- **Speech-to-Text**: Deepgram SDK
+- **File Handling**: Native FormData API
+
+## Prerequisites
+
+- Node.js 18+ 
+- Deepgram API Key ([Get one here](https://console.deepgram.com/))
+
+## Setup Instructions
+
+1. **Clone and Install**
+   ```bash
+   cd skitreai
+   npm install
+   ```
+
+2. **Environment Configuration**
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   
+   Edit `.env.local` and add your Deepgram API key:
+   ```
+   DEEPGRAM_API_KEY=your_actual_api_key_here
+   ```
+
+3. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open Application**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## How It Works
+
+1. **File Upload**: Users can drag & drop or select audio/video files
+2. **Format Detection**: App automatically detects file type and format
+3. **Video Conversion**: If video file, converts to audio using FFmpeg
+4. **Speech Processing**: Sends audio to Deepgram for transcription
+5. **Results Display**: Shows transcription with confidence scores and metadata
+
+## Supported File Types
+
+- **Audio**: `.webm`, `.m4a`, `.wav`, `.mp3`
+- **Video**: `.webm`, `.mp4` (converted to audio automatically)
+
+## API Endpoints
+
+### POST `/api/transcribe`
+
+Uploads and transcribes audio/video files.
+
+**Request**: FormData with `file` field
+**Response**:
+```json
+{
+  "success": true,
+  "transcription": "Your transcribed text here...",
+  "confidence": 0.95,
+  "metadata": {
+    "duration": 30.5,
+    "channels": 1
+  }
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Error Handling
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application includes comprehensive error handling for:
+- Unsupported file types
+- Missing API keys
+- FFmpeg conversion failures
+- Deepgram API errors
+- Network issues
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+### Vercel (Recommended)
 
-To learn more about Next.js, take a look at the following resources:
+1. Push to GitHub
+2. Import project in Vercel
+3. Add `DEEPGRAM_API_KEY` environment variable
+4. Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Other Platforms
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ensure your deployment platform supports:
+- Node.js 18+
+- FFmpeg binary execution
+- File system write access for temporary files
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Install dependencies
+npm install
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Lint code
+npm run lint
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
