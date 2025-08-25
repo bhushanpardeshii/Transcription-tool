@@ -44,7 +44,11 @@ export default function Home() {
 
           {/* Transcription Error Display */}
           {transcriptionMutation.error && (
-            <ErrorDisplay error={transcriptionMutation.error.message} />
+            <ErrorDisplay 
+              error={transcriptionMutation.error.message}
+              details={(transcriptionMutation.error as Error & { details?: string }).details}
+              supportedFormats={(transcriptionMutation.error as Error & { supportedFormats?: string[] }).supportedFormats}
+            />
           )}
 
           {/* Transcription Results */}

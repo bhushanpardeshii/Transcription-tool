@@ -60,6 +60,9 @@ export function FileUploadForm({ onSubmit, isLoading = false }: FileUploadFormPr
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Supports WebM, M4A, MP4, WAV, MP3 files
             </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              ⚠️ Video files may not work in all deployment environments. For best results, use audio files.
+            </p>
           </div>
         </div>
       </div>

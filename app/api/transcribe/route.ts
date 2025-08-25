@@ -118,23 +118,32 @@ export async function POST(request: NextRequest) {
       // Convert video to audio if necessary
       if (file.type.startsWith('video/')) {
         if (!ffmpegAvailable || !ffmpegPath) {
-          throw new Error('FFmpeg is not available. Video files cannot be processed. Please upload audio files instead.');
+          console.error('FFmpeg not available in deployment environment');
+          return NextResponse.json({ 
+            error: 'Video processing not supported in deployment environment', 
+            details: 'Please upload audio files (.webm, .m4a, .wav, .mp3) instead of video files. Video processing requires FFmpeg which is not available on this deployment platform.',
+            supportedFormats: ['audio/webm', 'audio/m4a', 'audio/wav', 'audio/mp3']
+          }, { status: 400 });
         }
         
         console.log(`Converting video to audio: ${inputPath} -> ${outputPath}`);
         console.log(`Using FFmpeg binary: ${ffmpegPath}`);
         
-        await convertVideoToAudio(inputPath, outputPath);
-        
-        // Verify conversion was successful
         try {
+          await convertVideoToAudio(inputPath, outputPath);
+          
+          // Verify conversion was successful
           await access(outputPath, constants.F_OK);
           console.log('Video conversion successful, output file exists');
           audioPath = outputPath;
           filesToCleanup.push(outputPath);
-        } catch {
-          console.error('Video conversion failed - output file not found');
-          throw new Error('Video conversion failed to produce output file');
+        } catch (conversionError) {
+          console.error('Video conversion failed:', conversionError);
+          return NextResponse.json({ 
+            error: 'Video conversion failed', 
+            details: 'Unable to convert video to audio. Please try uploading an audio file instead (.webm, .m4a, .wav, .mp3).',
+            supportedFormats: ['audio/webm', 'audio/m4a', 'audio/wav', 'audio/mp3']
+          }, { status: 400 });
         }
       }
 

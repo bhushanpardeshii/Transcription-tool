@@ -22,8 +22,13 @@ export const useTranscription = () => {
       if (!response.ok) {
         const errorResult = errorResponseSchema.safeParse(data);
         const errorMessage = errorResult.success ? errorResult.data.error : 'Failed to transcribe';
-        const error = new Error(errorMessage) as TranscribeError;
+        const error = new Error(errorMessage) as TranscribeError & { 
+          details?: string; 
+          supportedFormats?: string[]; 
+        };
         error.status = response.status;
+        error.details = data.details;
+        error.supportedFormats = data.supportedFormats;
         throw error;
       }
 
